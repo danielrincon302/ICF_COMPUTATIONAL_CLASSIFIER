@@ -1,0 +1,294 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,english]{babel}
+\usepackage{array}
+\usepackage{float}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{ICF Computational Classifier: A Machine Learning System for Automatic Disability Classification Based on the International Classification of Functioning, Disability and Health Framework}
+
+\author{\IEEEauthorblockN{Author Name}
+\IEEEauthorblockA{\textit{Department/Institution} \\
+City, Country \\
+email@institution.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+Disability assessment based on the International Classification of Functioning, Disability and Health (ICF) framework traditionally relies on subjective evaluations by multidisciplinary teams, leading to inconsistencies and resource-intensive processes. This study presents a computational system for automatic disability classification using machine learning techniques applied to ICF qualifiers. A synthetic dataset of 100 individuals with disabilities was generated, encompassing 32 numeric features across body functions, body structures, activities and participation, and environmental factors. Seven classification algorithms were evaluated for two prediction tasks: disability category (9 classes) and required support level (4 classes). Results show that K-Nearest Neighbors achieved the best performance for disability category prediction (Accuracy: 70\%, F1-Score: 0.647), while Logistic Regression obtained optimal results for support level prediction (Accuracy: 90\%, F1-Score: 0.853). The findings demonstrate the feasibility of automated ICF-based classification, though limitations related to synthetic data and class imbalance indicate the need for validation with larger clinical datasets. This work establishes a foundation for developing clinical decision support tools that could standardize disability assessment processes.
+\end{abstract}
+
+\begin{IEEEkeywords}
+ICF, disability classification, machine learning, clinical decision support, WHO framework, automatic classification
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+The International Classification of Functioning, Disability and Health (ICF) is a comprehensive framework developed by the World Health Organization (WHO) for describing and measuring health and disability \cite{who2001icf}. Unlike traditional medical models that focus solely on diagnosis, the ICF adopts a biopsychosocial approach that considers the interaction between health conditions, body functions/structures, activities, participation, and environmental factors.
+
+Disability assessment using the ICF framework is traditionally performed by multidisciplinary teams comprising physicians, psychologists, therapists, and social workers. While this approach ensures comprehensive evaluation, it presents several challenges: (1) subjectivity in qualifier assignment, (2) inter-evaluator variability, (3) significant time and resource requirements, and (4) limited scalability for large populations.
+
+Machine learning techniques offer a promising avenue for addressing these challenges by providing objective, consistent, and scalable classification systems. This study explores the feasibility of developing an automated disability classification system based on ICF qualifiers, with two primary objectives: predicting disability category and determining required support level.
+
+\section{Objectives}
+
+\subsection{General Objective}
+
+To develop and validate a computational system for automatic disability classification based on the International Classification of Functioning, Disability and Health (ICF) framework, achieving clinically acceptable concordance ($\kappa \geq 0.70$) with multidisciplinary team evaluations, while identifying the methodological and data factors that optimize predictive performance.
+
+\subsection{Specific Objectives}
+
+\begin{enumerate}
+    \item \textbf{Dataset Construction and Characterization:} To construct a representative dataset of individuals with disabilities characterized by standardized ICF qualifiers, including at least 1,000 validated records from healthcare professionals, documenting the distribution of disability categories, severity levels, and environmental factors.
+
+    \item \textbf{Model Development and Optimization:} To design, implement, and optimize a machine learning pipeline integrating preprocessing techniques, class balancing, and feature selection, comparing at least five classification algorithms (including traditional methods and deep learning) to identify the architecture with optimal performance for disability category and support level prediction.
+
+    \item \textbf{Clinical Validation and Concordance:} To evaluate the concordance between computational system predictions and classifications issued by multidisciplinary expert teams, using Cohen's Kappa coefficient ($\kappa$) as the primary metric, with a clinical acceptability threshold of $\kappa \geq 0.70$, on an independent validation sample.
+
+    \item \textbf{Determinant Factor Analysis:} To identify and quantify methodological factors (algorithm, balancing technique, number of features) and data factors (sample size, qualifier quality, class representativeness) that significantly influence classifier performance, through sensitivity analysis and interpretability techniques (SHAP, permutation importance).
+\end{enumerate}
+
+\section{Materials and Methods}
+
+\subsection{The ICF Framework}
+
+The ICF classification system comprises four main components organized hierarchically:
+
+\textbf{Body Functions (b1-b8):} Physiological functions of body systems, including mental functions (b1), sensory functions (b2), voice and speech (b3), cardiovascular and respiratory (b4), digestive and metabolic (b5), genitourinary (b6), neuromusculoskeletal (b7), and skin functions (b8).
+
+\textbf{Body Structures (s1-s8):} Anatomical parts corresponding to each functional domain.
+
+\textbf{Activities and Participation (d1-d9):} Nine domains covering learning (d1), general tasks (d2), communication (d3), mobility (d4), self-care (d5), domestic life (d6), interpersonal relations (d7), major life areas (d8), and community participation (d9).
+
+\textbf{Environmental Factors (e1-e5):} External influences including products/technology (e1), natural environment (e2), social support (e3), attitudes (e4), and services/policies (e5).
+
+Each category is rated using a qualifier scale indicating severity: 0 (no problem, 0-4\%), 1 (mild, 5-24\%), 2 (moderate, 25-49\%), 3 (severe, 50-95\%), and 4 (complete problem, 96-100\%). Environmental factors use an extended scale (-4 to +4) where negative values represent barriers and positive values represent facilitators.
+
+\subsection{Synthetic Dataset Generation}
+
+A synthetic dataset was generated to simulate realistic disability profiles while maintaining internal coherence. The generation algorithm incorporated domain-specific probability distributions ensuring that primary affected domains for each disability type received higher severity qualifiers.
+
+\begin{table}[H]
+\centering
+\caption{Dataset Characteristics}
+\label{tab:dataset}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Total samples & 100 \\
+Numeric features & 32 \\
+Total columns & 71 \\
+Age range & 5-85 years \\
+Disability categories & 9 \\
+Support levels & 4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Feature Distribution by ICF Component}
+\label{tab:features}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Component} & \textbf{Categories} & \textbf{Scale} \\
+\midrule
+Body Functions & 8 (b1-b8) & 0-4 \\
+Body Structures & 8 (s1-s8) & 0-4 \\
+Activities \& Participation & 9 (d1-d9) & 0-4 \\
+Environmental Factors & 5 (e1-e5) & -4 to +4 \\
+Demographics & 2 (age, sex) & Continuous/Binary \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Disability Categories}
+
+The dataset includes nine disability categories with the following distribution:
+
+\begin{table}[H]
+\centering
+\caption{Disability Category Distribution}
+\label{tab:categories}
+\begin{tabular}{lc}
+\toprule
+\textbf{Category} & \textbf{Percentage} \\
+\midrule
+Physical & 24\% \\
+Visual & 19\% \\
+Hearing & 12\% \\
+Psychosocial & 12\% \\
+Intellectual & 10\% \\
+Autism Spectrum Disorder & 8\% \\
+Rare Disease & 7\% \\
+Neurodegenerative & 5\% \\
+Multiple & 3\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Computed Indices}
+
+Four derived indices were calculated to summarize functional profiles:
+
+\begin{itemize}
+    \item \textbf{Functional Severity Index:} Mean of body function qualifiers (b1-b8)
+    \item \textbf{Activity Limitation Index:} Mean of activity qualifiers (d1-d9)
+    \item \textbf{Global Disability Index:} Weighted combination of all qualifiers
+    \item \textbf{Required Support Level:} Categorical variable (Minimal, Intermittent, Limited, Extensive)
+\end{itemize}
+
+\subsection{Machine Learning Pipeline}
+
+The classification pipeline comprised the following stages:
+
+\textbf{1. Data Preprocessing:} Feature selection (32 numeric variables), handling of missing values, and sex encoding (binary).
+
+\textbf{2. Feature Scaling:} StandardScaler normalization to zero mean and unit variance.
+
+\textbf{3. Train-Test Split:} 80-20 stratified split preserving class proportions.
+
+\textbf{4. Model Training:} Seven algorithms were evaluated:
+\begin{itemize}
+    \item Logistic Regression (baseline)
+    \item Random Forest (100 estimators)
+    \item Gradient Boosting (100 estimators, max depth=5)
+    \item Support Vector Machine (RBF kernel)
+    \item K-Nearest Neighbors (k=5)
+    \item Decision Tree
+    \item Multilayer Perceptron (64, 32 hidden units)
+\end{itemize}
+
+\textbf{5. Evaluation:} 5-fold stratified cross-validation with weighted F1-score.
+
+\section{Results}
+
+\subsection{Disability Category Prediction}
+
+Table \ref{tab:results_category} presents the performance metrics for disability category prediction across all evaluated models.
+
+\begin{table}[H]
+\centering
+\caption{Model Performance - Disability Category Prediction}
+\label{tab:results_category}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Accuracy} & \textbf{F1-Score} & \textbf{CV F1} \\
+\midrule
+K-Nearest Neighbors & \textbf{0.70} & \textbf{0.647} & 0.447 \\
+Random Forest & 0.65 & 0.612 & 0.451 \\
+Gradient Boosting & 0.60 & 0.578 & 0.438 \\
+SVM (RBF) & 0.55 & 0.523 & 0.412 \\
+Logistic Regression & 0.50 & 0.489 & 0.398 \\
+Decision Tree & 0.45 & 0.434 & 0.356 \\
+Neural Network (MLP) & 0.55 & 0.512 & 0.402 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+K-Nearest Neighbors achieved the highest test accuracy (70\%) and F1-score (0.647). However, cross-validation results (CV F1 = 0.447 $\pm$ 0.061) indicate considerable variance, suggesting sensitivity to data partitioning.
+
+\subsection{Support Level Prediction}
+
+Table \ref{tab:results_support} shows performance metrics for required support level prediction.
+
+\begin{table}[H]
+\centering
+\caption{Model Performance - Support Level Prediction}
+\label{tab:results_support}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Accuracy} & \textbf{F1-Score} & \textbf{CV F1} \\
+\midrule
+Logistic Regression & \textbf{0.90} & \textbf{0.853} & 0.891 \\
+Random Forest & 0.90 & 0.847 & 0.885 \\
+Gradient Boosting & 0.90 & 0.851 & 0.889 \\
+SVM (RBF) & 0.90 & 0.849 & 0.887 \\
+K-Nearest Neighbors & 0.85 & 0.812 & 0.856 \\
+Decision Tree & 0.85 & 0.798 & 0.845 \\
+Neural Network (MLP) & 0.90 & 0.845 & 0.882 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All models achieved high performance ($\geq$85\% accuracy) for support level prediction. However, this result must be interpreted cautiously due to severe class imbalance: 92\% of samples belong to the ``Intermittent'' support level category.
+
+\subsection{Feature Importance Analysis}
+
+Analysis of feature importance using Random Forest revealed that the most predictive ICF components for disability category classification were:
+
+\begin{enumerate}
+    \item Body Functions (b1-Mental, b2-Sensory): 28\% cumulative importance
+    \item Activities (d3-Communication, d4-Mobility): 24\% cumulative importance
+    \item Body Structures (s1, s2, s7): 22\% cumulative importance
+    \item Environmental Factors: 15\% cumulative importance
+    \item Demographics (age): 11\% cumulative importance
+\end{enumerate}
+
+\section{Discussion}
+
+The results demonstrate that machine learning models can effectively classify disability categories and support levels using ICF qualifiers, supporting the feasibility of automated classification systems. The K-Nearest Neighbors algorithm's superior performance for category prediction suggests that disability profiles form distinguishable clusters in the feature space, where proximity-based classification is effective.
+
+The high performance in support level prediction (90\% accuracy) is largely attributable to class imbalance rather than genuine predictive capability. This highlights a critical limitation requiring attention in future work through techniques such as SMOTE, class weights, or undersampling.
+
+The gap between test performance and cross-validation scores indicates potential overfitting, likely due to the limited dataset size (n=100). Learning curve analysis suggests that expanding the dataset to $\geq$500 samples could substantially improve generalization.
+
+\subsection{Limitations}
+
+\begin{itemize}
+    \item \textbf{Synthetic Data:} Generated data cannot capture the full complexity and variability of real clinical presentations.
+    \item \textbf{Sample Size:} 100 samples limits statistical power and generalization capacity.
+    \item \textbf{Class Imbalance:} Uneven distribution affects model reliability, particularly for minority classes.
+    \item \textbf{Feature Simplification:} Only numeric qualifiers were used; textual clinical descriptions were excluded.
+    \item \textbf{No Clinical Validation:} Results have not been validated against expert evaluations.
+\end{itemize}
+
+\section{Conclusions}
+
+This study demonstrates the feasibility of developing automated disability classification systems based on the ICF framework using machine learning techniques. The following conclusions emerge from this work:
+
+\begin{enumerate}
+    \item \textbf{Technical Feasibility:} Machine learning models can effectively learn patterns from ICF qualifiers to predict disability categories, achieving 70\% accuracy with K-Nearest Neighbors on synthetic data.
+
+    \item \textbf{Component Relevance:} Body functions and activities/participation domains contribute most significantly to classification, aligning with the ICF's biopsychosocial model that emphasizes functional capacity.
+
+    \item \textbf{Data Requirements:} The limited dataset size (n=100) constrains model generalization. Future work should prioritize collecting larger clinical datasets ($\geq$1,000 samples) with balanced class distributions.
+
+    \item \textbf{Class Imbalance Challenge:} Support level prediction results are inflated due to severe class imbalance (92\% single class). Addressing this through resampling techniques is essential for reliable deployment.
+
+    \item \textbf{Clinical Validation Necessity:} Transitioning from synthetic to real clinical data and validating against expert multidisciplinary teams is critical for achieving the target concordance ($\kappa \geq 0.70$).
+
+    \item \textbf{Practical Implications:} An operational ICF-based classifier could standardize disability assessments, reduce inter-evaluator variability, and optimize resource allocation in healthcare systems.
+\end{enumerate}
+
+Future research should focus on: (1) dataset expansion with real clinical records, (2) implementation of class balancing techniques, (3) exploration of deep learning architectures, (4) integration of textual clinical notes via NLP, and (5) prospective clinical validation studies.
+
+\section*{Acknowledgment}
+
+The authors acknowledge the World Health Organization for the development and maintenance of the ICF framework, which provides the theoretical foundation for this work.
+
+\begin{thebibliography}{00}
+\bibitem{who2001icf} World Health Organization, ``International Classification of Functioning, Disability and Health (ICF),'' Geneva: WHO, 2001.
+\bibitem{cieza2019} A. Cieza et al., ``Global estimates of the need for rehabilitation based on the Global Burden of Disease study 2019,'' \textit{The Lancet}, vol. 396, no. 10267, pp. 2006-2017, 2020.
+\bibitem{sklearn} F. Pedregosa et al., ``Scikit-learn: Machine Learning in Python,'' \textit{Journal of Machine Learning Research}, vol. 12, pp. 2825-2830, 2011.
+\bibitem{stucki2017} G. Stucki et al., ``Developing ICF Core Sets for persons with disabilities,'' \textit{BMC Public Health}, vol. 17, no. 1, pp. 1-15, 2017.
+\bibitem{imbalanced2018} G. Lema\^itre, F. Nogueira, and C. K. Aridas, ``Imbalanced-learn: A Python Toolbox to Tackle the Curse of Imbalanced Datasets,'' \textit{Journal of Machine Learning Research}, vol. 18, no. 17, pp. 1-5, 2017.
+\end{thebibliography}
+
+\end{document}

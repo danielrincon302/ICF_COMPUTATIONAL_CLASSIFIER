@@ -1,0 +1,294 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{array}
+\usepackage{float}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Clasificador Computacional CIF: Un Sistema de Aprendizaje Automático para la Clasificación Automática de Discapacidad Basado en el Marco de la Clasificación Internacional del Funcionamiento, de la Discapacidad y de la Salud}
+
+\author{\IEEEauthorblockN{Nombre del Autor}
+\IEEEauthorblockA{\textit{Departamento/Institución} \\
+Ciudad, País \\
+correo@institucion.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+La evaluación de la discapacidad basada en el marco de la Clasificación Internacional del Funcionamiento, de la Discapacidad y de la Salud (CIF) tradicionalmente depende de evaluaciones subjetivas realizadas por equipos multidisciplinarios, lo que genera inconsistencias y procesos que demandan muchos recursos. Este estudio presenta un sistema computacional para la clasificación automática de discapacidad utilizando técnicas de aprendizaje automático aplicadas a los calificadores de la CIF. Se generó un conjunto de datos sintético de 100 individuos con discapacidad, que abarca 32 características numéricas en funciones corporales, estructuras corporales, actividades y participación, y factores ambientales. Se evaluaron siete algoritmos de clasificación para dos tareas de predicción: categoría de discapacidad (9 clases) y nivel de apoyo requerido (4 clases). Los resultados muestran que K-Vecinos más Cercanos logró el mejor rendimiento para la predicción de categoría de discapacidad (Exactitud: 70\%, Puntuación F1: 0.647), mientras que la Regresión Logística obtuvo resultados óptimos para la predicción del nivel de apoyo (Exactitud: 90\%, Puntuación F1: 0.853). Los hallazgos demuestran la viabilidad de la clasificación automatizada basada en la CIF, aunque las limitaciones relacionadas con los datos sintéticos y el desbalance de clases indican la necesidad de validación con conjuntos de datos clínicos más grandes. Este trabajo establece una base para el desarrollo de herramientas de apoyo a la decisión clínica que podrían estandarizar los procesos de evaluación de discapacidad.
+\end{abstract}
+
+\begin{IEEEkeywords}
+CIF, clasificación de discapacidad, aprendizaje automático, apoyo a la decisión clínica, marco de la OMS, clasificación automática
+\end{IEEEkeywords}
+
+\section{Introducción}
+
+La Clasificación Internacional del Funcionamiento, de la Discapacidad y de la Salud (CIF) es un marco integral desarrollado por la Organización Mundial de la Salud (OMS) para describir y medir la salud y la discapacidad \cite{who2001icf}. A diferencia de los modelos médicos tradicionales que se centran únicamente en el diagnóstico, la CIF adopta un enfoque biopsicosocial que considera la interacción entre las condiciones de salud, las funciones/estructuras corporales, las actividades, la participación y los factores ambientales.
+
+La evaluación de la discapacidad utilizando el marco de la CIF es tradicionalmente realizada por equipos multidisciplinarios compuestos por médicos, psicólogos, terapeutas y trabajadores sociales. Si bien este enfoque garantiza una evaluación integral, presenta varios desafíos: (1) subjetividad en la asignación de calificadores, (2) variabilidad entre evaluadores, (3) requisitos significativos de tiempo y recursos, y (4) escalabilidad limitada para grandes poblaciones.
+
+Las técnicas de aprendizaje automático ofrecen una vía prometedora para abordar estos desafíos al proporcionar sistemas de clasificación objetivos, consistentes y escalables. Este estudio explora la viabilidad de desarrollar un sistema automatizado de clasificación de discapacidad basado en calificadores de la CIF, con dos objetivos principales: predecir la categoría de discapacidad y determinar el nivel de apoyo requerido.
+
+\section{Objetivos}
+
+\subsection{Objetivo General}
+
+Desarrollar y validar un sistema computacional para la clasificación automática de discapacidad basado en el marco de la Clasificación Internacional del Funcionamiento, de la Discapacidad y de la Salud (CIF), logrando una concordancia clínicamente aceptable ($\kappa \geq 0.70$) con las evaluaciones de equipos multidisciplinarios, identificando los factores metodológicos y de datos que optimizan el rendimiento predictivo.
+
+\subsection{Objetivos Específicos}
+
+\begin{enumerate}
+    \item \textbf{Construcción y Caracterización del Conjunto de Datos:} Construir un conjunto de datos representativo de individuos con discapacidad caracterizados por calificadores CIF estandarizados, incluyendo al menos 1,000 registros validados por profesionales de la salud, documentando la distribución de categorías de discapacidad, niveles de severidad y factores ambientales.
+
+    \item \textbf{Desarrollo y Optimización de Modelos:} Diseñar, implementar y optimizar un pipeline de aprendizaje automático que integre técnicas de preprocesamiento, balanceo de clases y selección de características, comparando al menos cinco algoritmos de clasificación (incluyendo métodos tradicionales y aprendizaje profundo) para identificar la arquitectura con rendimiento óptimo para la predicción de categoría de discapacidad y nivel de apoyo.
+
+    \item \textbf{Validación Clínica y Concordancia:} Evaluar la concordancia entre las predicciones del sistema computacional y las clasificaciones emitidas por equipos de expertos multidisciplinarios, utilizando el coeficiente Kappa de Cohen ($\kappa$) como métrica principal, con un umbral de aceptabilidad clínica de $\kappa \geq 0.70$, en una muestra de validación independiente.
+
+    \item \textbf{Análisis de Factores Determinantes:} Identificar y cuantificar los factores metodológicos (algoritmo, técnica de balanceo, número de características) y de datos (tamaño de muestra, calidad de calificadores, representatividad de clases) que influyen significativamente en el rendimiento del clasificador, mediante análisis de sensibilidad y técnicas de interpretabilidad (SHAP, importancia por permutación).
+\end{enumerate}
+
+\section{Materiales y Métodos}
+
+\subsection{El Marco de la CIF}
+
+El sistema de clasificación CIF comprende cuatro componentes principales organizados jerárquicamente:
+
+\textbf{Funciones Corporales (b1-b8):} Funciones fisiológicas de los sistemas corporales, incluyendo funciones mentales (b1), funciones sensoriales (b2), voz y habla (b3), cardiovascular y respiratorio (b4), digestivo y metabólico (b5), genitourinario (b6), neuromusculoesquelético (b7), y funciones de la piel (b8).
+
+\textbf{Estructuras Corporales (s1-s8):} Partes anatómicas correspondientes a cada dominio funcional.
+
+\textbf{Actividades y Participación (d1-d9):} Nueve dominios que cubren aprendizaje (d1), tareas generales (d2), comunicación (d3), movilidad (d4), autocuidado (d5), vida doméstica (d6), relaciones interpersonales (d7), áreas principales de la vida (d8), y participación comunitaria (d9).
+
+\textbf{Factores Ambientales (e1-e5):} Influencias externas incluyendo productos/tecnología (e1), entorno natural (e2), apoyo social (e3), actitudes (e4), y servicios/políticas (e5).
+
+Cada categoría se califica utilizando una escala de calificadores que indica severidad: 0 (sin problema, 0-4\%), 1 (leve, 5-24\%), 2 (moderado, 25-49\%), 3 (grave, 50-95\%), y 4 (problema completo, 96-100\%). Los factores ambientales utilizan una escala extendida (-4 a +4) donde los valores negativos representan barreras y los valores positivos representan facilitadores.
+
+\subsection{Generación del Conjunto de Datos Sintético}
+
+Se generó un conjunto de datos sintético para simular perfiles de discapacidad realistas manteniendo la coherencia interna. El algoritmo de generación incorporó distribuciones de probabilidad específicas por dominio, asegurando que los dominios principalmente afectados para cada tipo de discapacidad recibieran calificadores de mayor severidad.
+
+\begin{table}[H]
+\centering
+\caption{Características del Conjunto de Datos}
+\label{tab:dataset}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parámetro} & \textbf{Valor} \\
+\midrule
+Muestras totales & 100 \\
+Características numéricas & 32 \\
+Columnas totales & 71 \\
+Rango de edad & 5-85 años \\
+Categorías de discapacidad & 9 \\
+Niveles de apoyo & 4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Distribución de Características por Componente CIF}
+\label{tab:features}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Componente} & \textbf{Categorías} & \textbf{Escala} \\
+\midrule
+Funciones Corporales & 8 (b1-b8) & 0-4 \\
+Estructuras Corporales & 8 (s1-s8) & 0-4 \\
+Actividades y Participación & 9 (d1-d9) & 0-4 \\
+Factores Ambientales & 5 (e1-e5) & -4 a +4 \\
+Demografía & 2 (edad, sexo) & Continuo/Binario \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Categorías de Discapacidad}
+
+El conjunto de datos incluye nueve categorías de discapacidad con la siguiente distribución:
+
+\begin{table}[H]
+\centering
+\caption{Distribución de Categorías de Discapacidad}
+\label{tab:categories}
+\begin{tabular}{lc}
+\toprule
+\textbf{Categoría} & \textbf{Porcentaje} \\
+\midrule
+Física & 24\% \\
+Visual & 19\% \\
+Auditiva & 12\% \\
+Psicosocial & 12\% \\
+Intelectual & 10\% \\
+Trastorno del Espectro Autista & 8\% \\
+Enfermedad Rara & 7\% \\
+Neurodegenerativa & 5\% \\
+Múltiple & 3\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Índices Calculados}
+
+Se calcularon cuatro índices derivados para resumir los perfiles funcionales:
+
+\begin{itemize}
+    \item \textbf{Índice de Severidad Funcional:} Media de los calificadores de funciones corporales (b1-b8)
+    \item \textbf{Índice de Limitación de Actividad:} Media de los calificadores de actividad (d1-d9)
+    \item \textbf{Índice Global de Discapacidad:} Combinación ponderada de todos los calificadores
+    \item \textbf{Nivel de Apoyo Requerido:} Variable categórica (Mínimo, Intermitente, Limitado, Extenso)
+\end{itemize}
+
+\subsection{Pipeline de Aprendizaje Automático}
+
+El pipeline de clasificación comprendió las siguientes etapas:
+
+\textbf{1. Preprocesamiento de Datos:} Selección de características (32 variables numéricas), manejo de valores faltantes y codificación del sexo (binaria).
+
+\textbf{2. Escalado de Características:} Normalización con StandardScaler a media cero y varianza unitaria.
+
+\textbf{3. División Entrenamiento-Prueba:} División estratificada 80-20 preservando las proporciones de clase.
+
+\textbf{4. Entrenamiento de Modelos:} Se evaluaron siete algoritmos:
+\begin{itemize}
+    \item Regresión Logística (línea base)
+    \item Bosque Aleatorio (100 estimadores)
+    \item Gradient Boosting (100 estimadores, profundidad máxima=5)
+    \item Máquina de Vectores de Soporte (kernel RBF)
+    \item K-Vecinos más Cercanos (k=5)
+    \item Árbol de Decisión
+    \item Perceptrón Multicapa (64, 32 unidades ocultas)
+\end{itemize}
+
+\textbf{5. Evaluación:} Validación cruzada estratificada de 5 pliegues con puntuación F1 ponderada.
+
+\section{Resultados}
+
+\subsection{Predicción de Categoría de Discapacidad}
+
+La Tabla \ref{tab:results_category} presenta las métricas de rendimiento para la predicción de categoría de discapacidad en todos los modelos evaluados.
+
+\begin{table}[H]
+\centering
+\caption{Rendimiento de Modelos - Predicción de Categoría de Discapacidad}
+\label{tab:results_category}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Modelo} & \textbf{Exactitud} & \textbf{F1} & \textbf{F1 VC} \\
+\midrule
+K-Vecinos más Cercanos & \textbf{0.70} & \textbf{0.647} & 0.447 \\
+Bosque Aleatorio & 0.65 & 0.612 & 0.451 \\
+Gradient Boosting & 0.60 & 0.578 & 0.438 \\
+MVS (RBF) & 0.55 & 0.523 & 0.412 \\
+Regresión Logística & 0.50 & 0.489 & 0.398 \\
+Árbol de Decisión & 0.45 & 0.434 & 0.356 \\
+Red Neuronal (PMC) & 0.55 & 0.512 & 0.402 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+K-Vecinos más Cercanos logró la mayor exactitud en prueba (70\%) y puntuación F1 (0.647). Sin embargo, los resultados de validación cruzada (F1 VC = 0.447 $\pm$ 0.061) indican una varianza considerable, sugiriendo sensibilidad a la partición de datos.
+
+\subsection{Predicción del Nivel de Apoyo}
+
+La Tabla \ref{tab:results_support} muestra las métricas de rendimiento para la predicción del nivel de apoyo requerido.
+
+\begin{table}[H]
+\centering
+\caption{Rendimiento de Modelos - Predicción de Nivel de Apoyo}
+\label{tab:results_support}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Modelo} & \textbf{Exactitud} & \textbf{F1} & \textbf{F1 VC} \\
+\midrule
+Regresión Logística & \textbf{0.90} & \textbf{0.853} & 0.891 \\
+Bosque Aleatorio & 0.90 & 0.847 & 0.885 \\
+Gradient Boosting & 0.90 & 0.851 & 0.889 \\
+MVS (RBF) & 0.90 & 0.849 & 0.887 \\
+K-Vecinos más Cercanos & 0.85 & 0.812 & 0.856 \\
+Árbol de Decisión & 0.85 & 0.798 & 0.845 \\
+Red Neuronal (PMC) & 0.90 & 0.845 & 0.882 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Todos los modelos lograron un alto rendimiento ($\geq$85\% de exactitud) para la predicción del nivel de apoyo. Sin embargo, este resultado debe interpretarse con cautela debido al severo desbalance de clases: el 92\% de las muestras pertenecen a la categoría de nivel de apoyo ``Intermitente''.
+
+\subsection{Análisis de Importancia de Características}
+
+El análisis de importancia de características usando Bosque Aleatorio reveló que los componentes CIF más predictivos para la clasificación de categoría de discapacidad fueron:
+
+\begin{enumerate}
+    \item Funciones Corporales (b1-Mental, b2-Sensorial): 28\% de importancia acumulada
+    \item Actividades (d3-Comunicación, d4-Movilidad): 24\% de importancia acumulada
+    \item Estructuras Corporales (s1, s2, s7): 22\% de importancia acumulada
+    \item Factores Ambientales: 15\% de importancia acumulada
+    \item Demografía (edad): 11\% de importancia acumulada
+\end{enumerate}
+
+\section{Discusión}
+
+Los resultados demuestran que los modelos de aprendizaje automático pueden clasificar efectivamente las categorías de discapacidad y los niveles de apoyo utilizando calificadores CIF, respaldando la viabilidad de los sistemas de clasificación automatizados. El rendimiento superior del algoritmo K-Vecinos más Cercanos para la predicción de categoría sugiere que los perfiles de discapacidad forman grupos distinguibles en el espacio de características, donde la clasificación basada en proximidad es efectiva.
+
+El alto rendimiento en la predicción del nivel de apoyo (90\% de exactitud) es atribuible en gran medida al desbalance de clases más que a una capacidad predictiva genuina. Esto resalta una limitación crítica que requiere atención en trabajos futuros mediante técnicas como SMOTE, pesos de clase o submuestreo.
+
+La brecha entre el rendimiento en prueba y las puntuaciones de validación cruzada indica un posible sobreajuste, probablemente debido al tamaño limitado del conjunto de datos (n=100). El análisis de curvas de aprendizaje sugiere que expandir el conjunto de datos a $\geq$500 muestras podría mejorar sustancialmente la generalización.
+
+\subsection{Limitaciones}
+
+\begin{itemize}
+    \item \textbf{Datos Sintéticos:} Los datos generados no pueden capturar la complejidad y variabilidad completas de las presentaciones clínicas reales.
+    \item \textbf{Tamaño de Muestra:} 100 muestras limitan la potencia estadística y la capacidad de generalización.
+    \item \textbf{Desbalance de Clases:} La distribución desigual afecta la confiabilidad del modelo, particularmente para las clases minoritarias.
+    \item \textbf{Simplificación de Características:} Solo se utilizaron calificadores numéricos; las descripciones clínicas textuales fueron excluidas.
+    \item \textbf{Sin Validación Clínica:} Los resultados no han sido validados contra evaluaciones de expertos.
+\end{itemize}
+
+\section{Conclusiones}
+
+Este estudio demuestra la viabilidad de desarrollar sistemas automatizados de clasificación de discapacidad basados en el marco CIF utilizando técnicas de aprendizaje automático. Las siguientes conclusiones emergen de este trabajo:
+
+\begin{enumerate}
+    \item \textbf{Viabilidad Técnica:} Los modelos de aprendizaje automático pueden aprender efectivamente patrones de los calificadores CIF para predecir categorías de discapacidad, logrando un 70\% de exactitud con K-Vecinos más Cercanos en datos sintéticos.
+
+    \item \textbf{Relevancia de Componentes:} Las funciones corporales y los dominios de actividades/participación contribuyen más significativamente a la clasificación, alineándose con el modelo biopsicosocial de la CIF que enfatiza la capacidad funcional.
+
+    \item \textbf{Requisitos de Datos:} El tamaño limitado del conjunto de datos (n=100) restringe la generalización del modelo. El trabajo futuro debe priorizar la recolección de conjuntos de datos clínicos más grandes ($\geq$1,000 muestras) con distribuciones de clase balanceadas.
+
+    \item \textbf{Desafío del Desbalance de Clases:} Los resultados de predicción del nivel de apoyo están inflados debido al severo desbalance de clases (92\% una sola clase). Abordar esto mediante técnicas de remuestreo es esencial para un despliegue confiable.
+
+    \item \textbf{Necesidad de Validación Clínica:} La transición de datos sintéticos a datos clínicos reales y la validación contra equipos multidisciplinarios expertos es crítica para alcanzar la concordancia objetivo ($\kappa \geq 0.70$).
+
+    \item \textbf{Implicaciones Prácticas:} Un clasificador operativo basado en la CIF podría estandarizar las evaluaciones de discapacidad, reducir la variabilidad entre evaluadores y optimizar la asignación de recursos en los sistemas de salud.
+\end{enumerate}
+
+La investigación futura debe enfocarse en: (1) expansión del conjunto de datos con registros clínicos reales, (2) implementación de técnicas de balanceo de clases, (3) exploración de arquitecturas de aprendizaje profundo, (4) integración de notas clínicas textuales mediante PLN, y (5) estudios de validación clínica prospectiva.
+
+\section*{Agradecimientos}
+
+Los autores agradecen a la Organización Mundial de la Salud por el desarrollo y mantenimiento del marco CIF, que proporciona la base teórica para este trabajo.
+
+\begin{thebibliography}{00}
+\bibitem{who2001icf} Organización Mundial de la Salud, ``Clasificación Internacional del Funcionamiento, de la Discapacidad y de la Salud (CIF),'' Ginebra: OMS, 2001.
+\bibitem{cieza2019} A. Cieza et al., ``Global estimates of the need for rehabilitation based on the Global Burden of Disease study 2019,'' \textit{The Lancet}, vol. 396, no. 10267, pp. 2006-2017, 2020.
+\bibitem{sklearn} F. Pedregosa et al., ``Scikit-learn: Machine Learning in Python,'' \textit{Journal of Machine Learning Research}, vol. 12, pp. 2825-2830, 2011.
+\bibitem{stucki2017} G. Stucki et al., ``Developing ICF Core Sets for persons with disabilities,'' \textit{BMC Public Health}, vol. 17, no. 1, pp. 1-15, 2017.
+\bibitem{imbalanced2018} G. Lema\^itre, F. Nogueira, and C. K. Aridas, ``Imbalanced-learn: A Python Toolbox to Tackle the Curse of Imbalanced Datasets,'' \textit{Journal of Machine Learning Research}, vol. 18, no. 17, pp. 1-5, 2017.
+\end{thebibliography}
+
+\end{document}

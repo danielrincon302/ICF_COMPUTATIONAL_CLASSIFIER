@@ -1,6 +1,24 @@
-# ICF Computational Classifier
+# MODELO DE DINÁMICA DE SISTEMAS PARA LA CARACTERIZACIÓN FUNCIONAL DE PERSONAS CON DISCAPACIDAD INTEGRANDO EL MARCO BIOPSICOSOCIAL DE LA CIF Y TÉCNICAS DE INTELIGENCIA ARTIFICIAL
 
 Sistema de clasificación computacional de discapacidad basado en la **Clasificación Internacional del Funcionamiento, de la Discapacidad y de la Salud (CIF)** de la Organización Mundial de la Salud (OMS).
+
+---
+
+## Objetivo General
+
+Predecir la categoría de discapacidad y el nivel de apoyo mediante un modelo de dinámica de sistemas integrado para la caracterización funcional de personas con discapacidad, basado en los calificadores del marco biopsicosocial de la Clasificación Internacional del Funcionamiento, de la Discapacidad y de la Salud (CIF).
+
+## Objetivos Específicos
+
+El objetivo general se pretende alcanzar cuando se desarrollen los siguientes objetivos específicos:
+
+1. **Construir y caracterizar un conjunto de datos representativo** de perfiles funcionales de personas con discapacidad, estructurado a partir de los calificadores estandarizados de los cuatro componentes de la CIF (funciones corporales, estructuras corporales, actividades y participación, y factores ambientales), que sirva como base para el entrenamiento y evaluación de los modelos predictivos.
+
+2. **Comprender las relaciones dinámicas** entre los componentes del marco biopsicosocial de la CIF mediante técnicas de dinámica de sistemas, identificando las interacciones entre funciones corporales, limitaciones en la actividad, restricciones en la participación y factores ambientales que determinan el perfil funcional y la categoría de discapacidad de un individuo.
+
+3. **Valorar comparativamente múltiples algoritmos de aprendizaje automático** para la clasificación de categorías de discapacidad y niveles de apoyo requerido.
+
+4. **Identificar y cuantificar las variables del marco CIF con mayor poder predictivo** en la determinación de la categoría de discapacidad y el nivel de apoyo, contribuyendo a la determinación de los factores biopsicosociales en la clasificación funcional.
 
 ---
 
